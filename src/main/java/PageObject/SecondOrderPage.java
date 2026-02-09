@@ -1,57 +1,66 @@
 package PageObject;
 
-import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selectors.*;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 
 public class SecondOrderPage {
+    // driver
+    private WebDriver driver;
+
     // Поле даты
-    private SelenideElement dateField = $(byXpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[1]/div[1]/div/input"));
+    private By dateField = By.xpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[1]/div/div/input");
 
     // Выбор срока
-    private SelenideElement chooseTerm = $(byClassName("Dropdown-root")).find(byClassName("Dropdown-arrow"));
+    private By chooseTerm =By.className("Dropdown-arrow");
 
     // Выбор цвета
-    private SelenideElement colorField = $(byClassName("Order_Checkboxes__3lWSI"));
+    private By colorField = By.className("Order_Checkboxes__3lWSI");
 
     // Кнопка заказа
-    private SelenideElement doOrder = $(byClassName("Order_Buttons__1xGrp")).$(byText("Заказать"));
+    private By doOrder = By.xpath("//*[@id=\"root\"]/div/div[2]/div[3]/button[2]");
 
     // Модальное окно подтверждение заказа
-    private SelenideElement modalWindow = $x(".//div[contains(@class, 'Order_ModalHeader')]");
+    private By modalWindow = By.xpath(".//div[contains(@class, 'Order_ModalHeader')]");
 
     // Кнопка "Да" в модальном окне подтверждения заказа
-    private SelenideElement yesButtonModalWindow = $(byXpath(".//*[@id='root']/div/div[2]/div[5]/div[2]/button[2]"));
+    private By yesButtonModalWindow = By.xpath(".//*[@id='root']/div/div[2]/div[5]/div[2]/button[2]");
 
     // Текст заказа
-    private SelenideElement textAccept = modalWindow.$(".Order_ModalHeader__3FDaJ");
+    private By acceptButton = By.xpath(".//*[@id='root']/div/div[2]/div[5]/div[2]/button[2]");
 
+    public SecondOrderPage (WebDriver driver){
+        this.driver = driver;
+    }
     public void setDateField(String date) {
-        dateField.shouldBe(visible).setValue(date);
+        driver.findElement(dateField).sendKeys("08.02.2026");
     }
 
     public void setTerm(String term){
-        chooseTerm.click();
-        $(byClassName("Dropdown-menu")).$$(byClassName("Dropdown-option")).findBy(text(term)).click();
+        driver.findElement(chooseTerm).click();
+        driver.findElement(By.className("Dropdown-menu"));
+        driver.findElement(By.xpath(".//*[@role='option' and text()='" + term + "']")).click();
     }
 
     public void setColorField(String color){
-        colorField.find(byId(color)).click();
+        driver.findElement(colorField).findElement(By.xpath(".//input[@id='" + color +"']")).click();
     }
 
     public void acceptOrder(){
-        modalWindow.shouldBe(enabled);
-        yesButtonModalWindow.shouldBe(visible).click();
+        driver.findElement(doOrder).click();
     }
     public void fillFields(String date, String term, String color, String comm){
         setDateField(date);
         setTerm(term);
         setColorField(color);
-        doOrder.click();
         acceptOrder();
-        System.out.println($(byClassName("Order_Modal__YZ-d3")).$(".Order_ModalHeader__3FDaJ").getText());
+        ((JavascriptExecutor)driver).executeScript("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));", driver.findElement(acceptButton));
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

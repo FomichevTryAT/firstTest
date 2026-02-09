@@ -1,59 +1,64 @@
 package PageObject;
 
-import com.codeborne.selenide.SelenideElement;
-
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Selectors.*;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.By;
 
 public class OrderPage {
+    // driver
+    private WebDriver driver;
+
     // Поле Имя
-    private SelenideElement nameField = $(byXpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[1]/input"));
+    private By nameField = By.xpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[1]/input");
 
     // Поле Фамилия
-    private SelenideElement surnameField = $(byXpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[2]/input"));
+    private By surnameField = By.xpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[2]/input");
 
     // Поле Адрес
-    private SelenideElement addressField = $(byXpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[3]/input"));
+    private By addressField = By.xpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[3]/input");
 
     // Поле Метро
-    private SelenideElement metroField = $(byClassName("select-search"));
+    private By metroField = By.className("select-search__value");
 
     // Поле номера телефона
-    private SelenideElement numberOfPhoneField = $(byXpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[5]/input"));
+    private By numberOfPhoneField = By.xpath("//*[@id=\"root\"]/div/div[2]/div[2]/div[5]/input");
 
     // Кнопка Далее
-    private SelenideElement nextButton = $(byXpath("//*[@id=\"root\"]/div/div[2]/div[3]/button"));
+    private By nextButton = By.xpath("//*[@id=\"root\"]/div/div[2]/div[3]/button");
 
+    public OrderPage (WebDriver driver){
+        this.driver = driver;
+    }
     public void setNameField (String name){
-        nameField.setValue(name);
+        driver.findElement(nameField).sendKeys(name);
     }
 
     public void setSurnameField (String surname){
-        surnameField.setValue(surname);
+        driver.findElement(surnameField).sendKeys(surname);
     }
 
     public void setAddressField (String address){
-        addressField.setValue(address);
+        driver.findElement(addressField).sendKeys(address);
     }
 
     public void setNumberOfPhoneField(String number){
-        numberOfPhoneField.setValue(number);
+        driver.findElement(numberOfPhoneField).sendKeys(number);
     }
 
     private void setMetroField(String station){
-        metroField.click();
-        $$(byClassName("select-search__row")).findBy(text(station)).click();
+        driver.findElement(metroField).click();
+        driver.findElement(By.xpath("//div[@class='Order_Text__2broi' and text()='" + station + "']/ancestor::li")).click();
     }
 
-    public SecondOrderPage fillAllFields(String name, String surname, String address, String metro, String numberOfPhone){
+    private void nextButtonClick(){
+        driver.findElement(nextButton).click();
+    }
+    public OrderPage fillAllFields(String name, String surname, String address, String metro, String numberOfPhone){
         setNameField(name);
         setSurnameField(surname);
         setAddressField(address);
         setMetroField(metro);
         setNumberOfPhoneField(numberOfPhone);
-        nextButton.click();
-        return new SecondOrderPage();
+        nextButtonClick();
+        return new OrderPage(driver);
     }
 }
